@@ -2,11 +2,9 @@ package com.example.lettucetest.config;
 
 import java.time.Duration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -16,10 +14,6 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializationContext.RedisSerializationContextBuilder;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,13 +32,13 @@ public class RedisConfig {
     }
     
     @Bean
-    public ReactiveRedisTemplate<String, Parent> reactiveJsonHotelRedisTemplate(
+    public ReactiveRedisTemplate<String, Parent> reactiveJsonRedisTemplate(
 	    ReactiveRedisConnectionFactory factory) {
 	log.info("Enter reactiveJsonHotelRedisTemplate");
 
 	Jackson2JsonRedisSerializer<Parent> serializer = new Jackson2JsonRedisSerializer<>(
 		Parent.class);
-	serializer.setObjectMapper(objectMapper());
+	//serializer.setObjectMapper(objectMapper());
 	RedisSerializationContextBuilder<String, Parent> builder = RedisSerializationContext
 		.newSerializationContext(new StringRedisSerializer());
 	RedisSerializationContext<String, Parent> serializationContext = builder.hashValue(serializer)
@@ -53,7 +47,7 @@ public class RedisConfig {
 	return new ReactiveRedisTemplate<>(factory, serializationContext);
     }
 
-    @Bean
+   /* @Bean
     public ObjectMapper objectMapper() {
 	ObjectMapper objectMapper = new ObjectMapper();
 
@@ -68,7 +62,7 @@ public class RedisConfig {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         return objectMapper;
-    }
+    }*/
 
     private LettuceClientConfiguration lettuceConfig() {
 	return LettuceClientConfiguration.builder().commandTimeout(Duration.ofSeconds(2))

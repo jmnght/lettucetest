@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -48,6 +49,11 @@ public class LettuceController {
 	    template.opsForHash().put("master-key", "entry-" + i, p).subscribe();
 	    //template.opsForValue().set("use-key-" + i, p).subscribe();
 	}
+    }
+    
+    @PreDestroy
+    private void preDestroy() {
+	server.stop();
     }
 
     public Mono<ServerResponse> get(ServerRequest req) {
