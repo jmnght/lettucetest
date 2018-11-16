@@ -50,7 +50,6 @@ public class LettuceController {
 	}
     }
 
-    @GetMapping("/")
     public Mono<ServerResponse> get(ServerRequest req) {
 	
 	List<Parent> pList = new ArrayList<>();
@@ -67,7 +66,6 @@ public class LettuceController {
 	return ServerResponse.ok().body(response, Parent.class);
     }
     
-    @GetMapping("/")
     public Mono<ServerResponse> getFromRedis(ServerRequest req) {
 	
 	Flux<Parent> response = template.<String, Parent>opsForHash().entries("master-key")
