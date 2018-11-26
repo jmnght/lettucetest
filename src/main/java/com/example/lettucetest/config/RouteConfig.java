@@ -17,6 +17,7 @@ public class RouteConfig {
     public RouterFunction<ServerResponse> monoRouterFunction(LettuceController handler) {
 	
 	return route(GET("/"), handler::get)
-		.andRoute(GET("/fromRedis"), handler::getFromRedis);
+		.andRoute(GET("/fromRedis"), handler::getFromRedis)
+		.andRoute(GET("/fromRedisStr"), handler::getStrFromRedis);
     }
 }

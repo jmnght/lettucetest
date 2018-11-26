@@ -1,5 +1,6 @@
 package com.example.lettucetest.config;
 
+import java.io.Serializable;
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
@@ -11,8 +12,12 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Child {
+public class Child implements Serializable {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private Long id;
     private String name;
     

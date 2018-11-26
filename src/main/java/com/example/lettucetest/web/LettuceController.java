@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import com.example.lettucetest.config.Child;
 import com.example.lettucetest.config.Parent;
 
 import reactor.core.publisher.Flux;
@@ -29,6 +30,9 @@ public class LettuceController {
 
     @Autowired
     ReactiveRedisTemplate<String, Parent> template;
+    
+    @Autowired
+    ReactiveRedisTemplate<String, String> strTemplate;
 
     @PostConstruct
     private void postConstruct() {
@@ -39,14 +43,26 @@ public class LettuceController {
 	    e.printStackTrace();
 	} // bind to a random port
 	server.start();
+	
+	List<Child> children = new ArrayList<>();
+	for (int i = 0; i < 1000; i++) {
+	    Child c = new Child();
+	    c.setId(Long.valueOf(i));
+	    c.setName("My name is: " + i);
+	    c.setUrls(Arrays.asList("www.google.com", "www.apple.com", "www.facebook.com"));
+	    children.add(c);
+	}
 
 	for (long i = 0; i < 4; i++) {
 	    
 	    Parent p = new Parent();
 	    p.setId(Long.valueOf(i));
 	    p.setName(String.valueOf(i));
+	    p.setChildList(children);
 
 	    template.opsForHash().put("master-key", "entry-" + i, p).subscribe();
+	    strTemplate.opsForValue().set("string-key" + i, p.toString() + "-" + i).subscribe();
+	    System.out.println();
 	    //template.opsForValue().set("use-key-" + i, p).subscribe();
 	}
     }
@@ -76,14 +92,29 @@ public class LettuceController {
 	
 	Flux<Parent> response = template.<String, Parent>opsForHash().entries("master-key")
 		.map(Map.Entry::getValue)
-		.doOnSubscribe(e -> System.out.println("onsub " + e))
-		.doOnNext(e -> System.out.println("onNext " + e))
+		//.doOnSubscribe(e -> System.out.println("onsub " + e))
+		//.doOnNext(e -> System.out.println("onNext " + e))
 		.map(p -> {
-		    System.out.println(p);
+		    //System.out.println(p);
 		    return p;
 		});
 	
 	return ServerResponse.ok().body(response, Parent.class);
+    }
+    
+    public Mono<ServerResponse> getStrFromRedis(ServerRequest req) {
+
+	Mono<String> response = strTemplate.opsForValue().get("string-key1")
+		.zipWith(strTemplate.opsForValue().get("string-key2"))
+		.map(t -> {
+		    
+		    return t.getT1() + t.getT2();
+		})
+		//.doOnSubscribe(e -> System.out.println("onsub " + e))
+		//.doOnNext(e -> System.out.println("onNext " + e))
+		;
+
+	return ServerResponse.ok().body(response, String.class);
     }
 
 }

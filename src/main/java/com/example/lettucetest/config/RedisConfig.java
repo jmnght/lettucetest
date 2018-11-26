@@ -5,11 +5,13 @@ import java.time.Duration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializationContext.RedisSerializationContextBuilder;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -32,19 +34,31 @@ public class RedisConfig {
     }
     
     @Bean
+    public ReactiveRedisTemplate<String, String> reactiveRedisTemplate(
+	    ReactiveRedisConnectionFactory factory) {
+	log.info("Enter reactiveJsonHotelRedisTemplate");
+
+	//serializer.setObjectMapper(objectMapper());
+	RedisSerializationContextBuilder<String, String> builder = RedisSerializationContext
+		.newSerializationContext(new StringRedisSerializer());
+	RedisSerializationContext<String, String> serializationContext = builder.build();
+
+	return new ReactiveRedisTemplate<>(factory, serializationContext);
+    }
+    
+    @Bean
     public ReactiveRedisTemplate<String, Parent> reactiveJsonRedisTemplate(
 	    ReactiveRedisConnectionFactory factory) {
 	log.info("Enter reactiveJsonHotelRedisTemplate");
 
-	Jackson2JsonRedisSerializer<Parent> serializer = new Jackson2JsonRedisSerializer<>(
-		Parent.class);
+	Jackson2JsonRedisSerializer<Parent> serializer = new Jackson2JsonRedisSerializer<>(Parent.class);
 	//serializer.setObjectMapper(objectMapper());
 	RedisSerializationContextBuilder<String, Parent> builder = RedisSerializationContext
 		.newSerializationContext(new StringRedisSerializer());
 	RedisSerializationContext<String, Parent> serializationContext = builder.hashValue(serializer)
 		.build();
 
-	return new ReactiveRedisTemplate<>(factory, serializationContext);
+	return new ReactiveRedisTemplate<>(factory, serializationContext, true);
     }
 
    /* @Bean
